@@ -57,7 +57,13 @@ class ContentGenerator:
                 {"role": "user", "content": user_prompt},
             ],
         )
-        return response.choices[0].message.content.strip()
+        content = response.choices[0].message.content
+        if not content:
+            raise RuntimeError(
+                f"Leere Antwort vom Modell '{OPENROUTER_MODEL}'. "
+                "Prüfe ob der Modellname auf openrouter.ai korrekt ist."
+            )
+        return content.strip()
 
     async def generate_posts(
         self,

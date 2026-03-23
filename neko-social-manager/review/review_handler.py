@@ -227,9 +227,11 @@ async def _check_all_done(
 def register_review_handlers(application):
     """Register callback and message handlers for the review flow."""
     application.add_handler(CallbackQueryHandler(handle_callback, pattern=r"^(approve|revise|discard):"))
+    # group=1 so normal session texts (group 0) are captured first
     application.add_handler(
         MessageHandler(
             filters.TEXT & ~filters.COMMAND,
             handle_revision_text,
-        )
+        ),
+        group=1,
     )
