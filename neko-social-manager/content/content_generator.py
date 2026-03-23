@@ -5,7 +5,7 @@ from openai import AsyncOpenAI
 logger = logging.getLogger(__name__)
 
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
-OPENROUTER_MODEL = "anthropic/claude-sonnet-4-5"
+OPENROUTER_MODEL = "nvidia/nemotron-3-super-120b-a12b:free"
 
 SYSTEM_PROMPT = """Du bist der Social Media Manager der NEKO GmbH aus Deisslingen/Lauffen bei Rottweil.
 NEKO steht für NEue KOnzepte – ganzheitliche Energieberatung mit den Leistungen Bad, Wärme & Strom.
