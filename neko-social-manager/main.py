@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 REQUIRED_VARS = [
     "TELEGRAM_BOT_TOKEN",
     "BLOTATO_API_KEY",
-    "ANTHROPIC_API_KEY",
+    "OPENROUTER_API_KEY",
     "OPENAI_API_KEY",
     "LINKEDIN_ACCOUNT_ID",
     "INSTAGRAM_ACCOUNT_ID",
@@ -47,10 +47,10 @@ TELEGRAM_BOT_TOKEN – So erstellst du einen Bot:
   4. Wähle einen Username (muss auf "bot" enden, z. B. "neko_content_bot")
   5. BotFather gibt dir einen Token – kopiere ihn in die .env
 
-ANTHROPIC_API_KEY:
-  → https://console.anthropic.com → API Keys
+OPENROUTER_API_KEY (für Content-Generierung via Claude):
+  → https://openrouter.ai/keys
 
-OPENAI_API_KEY (für Whisper Spracherkennung):
+OPENAI_API_KEY (nur für Whisper Spracherkennung – OpenRouter unterstützt kein Audio):
   → https://platform.openai.com/api-keys
 
 BLOTATO_API_KEY:

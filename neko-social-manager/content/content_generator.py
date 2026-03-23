@@ -1,8 +1,11 @@
 import logging
 import os
-from anthropic import AsyncAnthropic
+from openai import AsyncOpenAI
 
 logger = logging.getLogger(__name__)
+
+OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+OPENROUTER_MODEL = "anthropic/claude-sonnet-4-5"
 
 SYSTEM_PROMPT = """Du bist der Social Media Manager der NEKO GmbH aus Deisslingen/Lauffen bei Rottweil.
 NEKO steht für NEue KOnzepte – ganzheitliche Energieberatung mit den Leistungen Bad, Wärme & Strom.
@@ -40,7 +43,21 @@ Antworte NUR mit dem fertigen Post-Text, kein Kommentar davor oder danach.""",
 
 class ContentGenerator:
     def __init__(self):
-        self.client = AsyncAnthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+        self.client = AsyncOpenAI(
+            api_key=os.environ["OPENROUTER_API_KEY"],
+            base_url=OPENROUTER_BASE_URL,
+        )
+
+    async def _chat(self, user_prompt: str) -> str:
+        response = await self.client.chat.completions.create(
+            model=OPENROUTER_MODEL,
+            max_tokens=2048,
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": user_prompt},
+            ],
+        )
+        return response.choices[0].message.content.strip()
 
     async def generate_posts(
         self,
@@ -58,17 +75,8 @@ class ContentGenerator:
         posts = {}
         for platform, instruction in PLATFORM_INSTRUCTIONS.items():
             logger.info(f"Generating {platform} post for '{project_name}'")
-            user_prompt = (
-                f"{instruction}\n\n"
-                f"--- ROHMATERIAL ---\n{raw_content}"
-            )
-            message = await self.client.messages.create(
-                model="claude-sonnet-4-20250514",
-                max_tokens=2048,
-                system=SYSTEM_PROMPT,
-                messages=[{"role": "user", "content": user_prompt}],
-            )
-            posts[platform] = message.content[0].text.strip()
+            user_prompt = f"{instruction}\n\n--- ROHMATERIAL ---\n{raw_content}"
+            posts[platform] = await self._chat(user_prompt)
             logger.info(f"{platform} post generated ({len(posts[platform])} chars)")
 
         return posts
@@ -88,10 +96,4 @@ class ContentGenerator:
             f"--- ÄNDERUNGSWUNSCH DES NUTZERS ---\n{feedback}\n\n"
             f"Überarbeite den Post entsprechend dem Feedback. Halte alle Plattform-Vorgaben ein."
         )
-        message = await self.client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=2048,
-            system=SYSTEM_PROMPT,
-            messages=[{"role": "user", "content": user_prompt}],
-        )
-        return message.content[0].text.strip()
+        return await self._chat(user_prompt)
