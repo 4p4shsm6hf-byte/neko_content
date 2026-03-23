@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 # Modell über .env konfigurierbar – Standardwert ist ein zuverlässiges kostenloses Modell.
 # Empfehlungen: meta-llama/llama-3.1-8b-instruct:free, google/gemma-3-9b-it:free
-OPENROUTER_MODEL = os.environ.get("OPENROUTER_MODEL", "meta-llama/llama-3.1-8b-instruct:free")
+OPENROUTER_MODEL = os.environ.get("OPENROUTER_MODEL", "openrouter/free")
 
 # Feste NEKO-Hashtag-Bibliothek für Instagram – kein Modell erfindet Hashtags neu
 NEKO_HASHTAGS = (
