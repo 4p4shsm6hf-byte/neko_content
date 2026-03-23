@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git remote:*)",
+      "Bash(gh auth:*)",
+      "Bash(git config:*)",
+      "Bash(pip install:*)",
+      "Bash(python -m pytest tests/ -v)",
+      "Bash(python main.py)",
+      "Bash(taskkill /F /IM python.exe)",
+      "Bash(taskkill //F //IM python.exe)",
+      "Skill(claude-api)",
+      "Skill(claude-api:*)",
+      "Bash(python test_content.py)",
+      "Bash(xargs wc:*)",
+      "Bash(cmd /c \"taskkill /F /IM python.exe\")",
+      "Bash(echo exit=$?)",
+      "Bash(powershell -Command \"Get-Process python -ErrorAction SilentlyContinue | Stop-Process -Force; Write-Host Done\")"
+    ]
+  }
+}

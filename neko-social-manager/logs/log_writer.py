@@ -1,7 +1,9 @@
 """
-Writes published post entries to logs/published_posts.md.
-New entries are prepended (newest first).
+Writes published post entries to logs/published_posts.md (human-readable)
+and logs/post_history.json (full texts for AI context).
+New entries are prepended (newest first) in the markdown file.
 """
+import json
 import logging
 from datetime import datetime
 from pathlib import Path
@@ -9,6 +11,7 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 
 LOG_FILE = Path("logs/published_posts.md")
+HISTORY_FILE = Path("logs/post_history.json")
 
 PLATFORM_LABELS = {
     "linkedin":  "LinkedIn",
@@ -38,15 +41,42 @@ def _status_row(platform: str, result: dict) -> str:
     return f"| {label} | {status_cell} | {url_cell} | {date_cell} |"
 
 
+def _write_history(project_name: str, posts: dict[str, str], results: dict[str, dict]):
+    """Append full post texts to post_history.json for AI context."""
+    HISTORY_FILE.parent.mkdir(exist_ok=True)
+
+    history = []
+    if HISTORY_FILE.exists():
+        try:
+            history = json.loads(HISTORY_FILE.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            history = []
+
+    entry = {
+        "date": datetime.now().strftime("%Y-%m-%d"),
+        "project": project_name,
+    }
+    for platform in ("linkedin", "instagram", "facebook"):
+        if results.get(platform, {}).get("status") == "published":
+            entry[platform] = posts.get(platform, "")
+
+    # Only save if at least one platform was published
+    if any(k in entry for k in ("linkedin", "instagram", "facebook")):
+        history.append(entry)
+        # Keep last 20 entries to limit file size
+        history = history[-20:]
+        HISTORY_FILE.write_text(json.dumps(history, ensure_ascii=False, indent=2), encoding="utf-8")
+        logger.info(f"Post history updated for '{project_name}' ({len(history)} entries total)")
+
+
 async def write_log_entry(
     project_name: str,
     posts: dict[str, str],
     results: dict[str, dict],
 ):
-    """Prepend a new log entry to published_posts.md."""
+    """Prepend a new log entry to published_posts.md and update post_history.json."""
     LOG_FILE.parent.mkdir(exist_ok=True)
 
-    now = datetime.now().strftime("%Y-%m-%d %H:%M")
     date_str = datetime.now().strftime("%Y-%m-%d")
 
     # Build summary from first published post text
@@ -83,3 +113,6 @@ async def write_log_entry(
 
     LOG_FILE.write_text(header + entry + body, encoding="utf-8")
     logger.info(f"Log entry written for '{project_name}'")
+
+    # Also save full texts to JSON history for AI context
+    _write_history(project_name, posts, results)

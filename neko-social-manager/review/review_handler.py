@@ -11,6 +11,7 @@ Flow per platform:
 import logging
 import os
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Optional
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
@@ -208,6 +209,13 @@ async def _check_all_done(
 
     await write_log_entry(session.project_name, session.posts, session.results)
     del _sessions[chat_id]
+
+    # Cleanup: media files no longer needed after publishing
+    for path in session.media_paths:
+        try:
+            Path(path).unlink(missing_ok=True)
+        except Exception as e:
+            logger.warning(f"Could not delete media file {path}: {e}")
 
     summary_lines = ["📋 *Zusammenfassung:*"]
     for platform in PLATFORMS:
