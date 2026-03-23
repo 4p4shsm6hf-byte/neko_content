@@ -51,7 +51,7 @@ class ContentGenerator:
     async def _chat(self, user_prompt: str) -> str:
         response = await self.client.chat.completions.create(
             model=OPENROUTER_MODEL,
-            max_tokens=2048,
+            max_tokens=8192,  # reasoning models consume tokens internally before outputting
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": user_prompt},
