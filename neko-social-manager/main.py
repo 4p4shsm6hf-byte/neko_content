@@ -13,6 +13,10 @@ from dotenv import load_dotenv
 # Load .env before anything else
 load_dotenv()
 
+# Fix Unicode output on Windows terminals
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
@@ -29,8 +33,8 @@ REQUIRED_VARS = [
     "FACEBOOK_ACCOUNT_ID",
 ]
 
-# In TEST_MODE only TELEGRAM_BOT_TOKEN is required
-TEST_MODE_VARS = ["TELEGRAM_BOT_TOKEN"]
+# In TEST_MODE: Telegram + OpenRouter required, Blotato/Social skipped
+TEST_MODE_VARS = ["TELEGRAM_BOT_TOKEN", "OPENROUTER_API_KEY"]
 
 SETUP_GUIDE = """
 ╔══════════════════════════════════════════════════════════════════╗
@@ -112,34 +116,8 @@ def main():
 
 
 def _patch_for_test_mode():
-    """Replace ContentGenerator and BlotatoClient with lightweight stubs."""
-    import content.content_generator as cg_module
+    """Replace only BlotatoClient with a stub – ContentGenerator uses real OpenRouter."""
     import blotato.blotato_client as bl_module
-
-    class _StubGenerator:
-        async def generate_posts(self, project_name, transcription, media_description):
-            logger.info("[TEST] Dummy-Posts generiert (kein OpenRouter-Call)")
-            return {
-                "linkedin": (
-                    f"[TEST] LinkedIn-Post für '{project_name}'\n\n"
-                    f"Transkription: {transcription[:120]}…\n"
-                    f"Medien: {media_description}\n\n"
-                    "#NEKO #Energie #Test"
-                ),
-                "instagram": (
-                    f"[TEST] 🔧 Baustelle '{project_name}' – läuft! ⚡\n\n"
-                    ".\n\n"
-                    "#neko #solar #wärmepumpe #test #energie"
-                ),
-                "facebook": (
-                    f"[TEST] Hallo Community! Heute war unser Team auf der Baustelle '{project_name}'. "
-                    "Was interessiert euch am meisten – Solar oder Wärmepumpe? 👇\n\n#NEKO #Test"
-                ),
-            }
-
-        async def revise_post(self, platform, original_post, feedback):
-            logger.info(f"[TEST] Dummy-Revision für {platform} (kein OpenRouter-Call)")
-            return f"[TEST – ÜBERARBEITET]\n{original_post}\n\n(Feedback war: {feedback})"
 
     class _StubBlotatoClient:
         async def upload_media(self, file_path):
@@ -157,10 +135,8 @@ def _patch_for_test_mode():
         async def publish_with_retry(self, post_id, retries=3):
             return await self.publish_post(post_id)
 
-    # Monkey-patch the classes so all imports pick up the stubs
-    cg_module.ContentGenerator = _StubGenerator
     bl_module.BlotatoClient = _StubBlotatoClient
-    logger.info("[TEST] ContentGenerator & BlotatoClient durch Stubs ersetzt.")
+    logger.info("[TEST] BlotatoClient durch Stub ersetzt – OpenRouter wird echt aufgerufen.")
 
 
 if __name__ == "__main__":
