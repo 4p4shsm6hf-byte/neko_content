@@ -15,7 +15,15 @@
       "Bash(xargs wc:*)",
       "Bash(cmd /c \"taskkill /F /IM python.exe\")",
       "Bash(echo exit=$?)",
-      "Bash(powershell -Command \"Get-Process python -ErrorAction SilentlyContinue | Stop-Process -Force; Write-Host Done\")"
+      "Bash(powershell -Command \"Get-Process python -ErrorAction SilentlyContinue | Stop-Process -Force; Write-Host Done\")",
+      "Bash(docker compose:*)",
+      "Read(//Applications/Docker.app/Contents/Resources/bin/**)",
+      "Read(//usr/local/bin/**)",
+      "Bash(/Applications/Docker.app/Contents/Resources/bin/docker compose:*)",
+      "Bash(PATH=\"/Applications/Docker.app/Contents/Resources/bin:$PATH\" /Applications/Docker.app/Contents/Resources/bin/docker compose build)",
+      "Bash(PATH=\"/Applications/Docker.app/Contents/Resources/bin:$PATH\" /Applications/Docker.app/Contents/Resources/bin/docker compose up -d)",
+      "Bash(PATH=\"/Applications/Docker.app/Contents/Resources/bin:$PATH\" /Applications/Docker.app/Contents/Resources/bin/docker compose logs)",
+      "Bash(PATH=\"/Applications/Docker.app/Contents/Resources/bin:$PATH\" /Applications/Docker.app/Contents/Resources/bin/docker compose restart)"
     ]
   }
 }

@@ -1,6 +1,7 @@
 services:
   neko-bot:
-    image: dhoxha/neko-social-manager:latest
+    build: .
+    platform: linux/arm64
     restart: unless-stopped
     env_file: .env
     volumes:
